@@ -4,6 +4,13 @@
  */
 
 (function(window, undefined) {
+    var defaultindex = 0;
+    var defaultVol = 0.5;
+    var defaultisMuted = false;
+    var defaultisPlay = false;
+    var defaultplayMode = 1;
+    var defaultisLoop = false;
+
     function playList() {
         this.srcList = new Array();
         this.musicList = new Array();
@@ -18,6 +25,10 @@
                     this.musicList.push(aList[eIndex].href);
                 }
             }
+            ;
+            this.currentMusic.index = defaultindex;
+            this.currentMusic.name = this.musicList[defaultindex];
+            this.currentMusic.src = this.srcList[defaultindex];
         };
 
         this.getOne = function(index) {
@@ -50,154 +61,217 @@
             this.currentMusic.src = this.srcList[tmpIndex];
             return this.currentMusic;
         };
-    }
-    ;
-    function musicPlayer(list) {
-        this.musicList = list;
-        this.loopMode = 0;
-        this.isPlay = false;
-        this.isLoop = false;
-        this.isMuted = false;
-        this.currentVolume = 0.5;
 
-        this.playMusic = function(src) {
-            this.audioPlayer.src = src;
-            this.playerPlay();
+        this.isFirst = function() {
+            return this.currentMusic.index === 0;
         };
 
-        this.playerPlay = function() {
-            if (this.audioPlayer.src === "")
-                this.audioPlayer.src = this.musicList.getOne(0).src;
-            this.audioPlayer.play();
+        this.isLast = function() {
+            return (this.currentMusic.index + 1) === this.srcList.length;
+        };
+    }
+    ;
+
+    function playPanel() {
+        this.init = function() {
+            this.initElement();
+            this.initStyle();
+        };
+
+        this.initElement = function() {
+            this.playerFrame = document.createElement("div");
+            this.audioPlayer = document.createElement("audio");
+            this.leftFrame = document.createElement("div");
+            this.midFrame = document.createElement("div");
+            this.midrightFrame = document.createElement("div");
+            this.rightFrame = document.createElement("div");
+
+            this.prevButton = document.createElement("img");
+            this.playButton = document.createElement("img");
+            this.nextButton = document.createElement("img");
+
+            this.timeLine = document.createElement("div");
+            this.timeButton = document.createElement("img");
+
+            this.singleButton = document.createElement("img");
+            this.listButton = document.createElement("img");
+            this.randomButton = document.createElement("img");
+            this.volSwitch = document.createElement("img");
+
+            this.volLine = document.createElement("div");
+            this.volButton = document.createElement("img");
+        };
+
+        this.initStyle = function() {
+            this.playerFrame.setAttribute("style", "text-align: center;position: fixed;left: 0px;width: 1000px;bottom: 0px;border: 1px solid black;border-radius: 10px;");
+
+            this.audioPlayer.autoplay = false;
+            this.audioPlayer.controls = false;
+            this.audioPlayer.volume = defaultVol;
+
+            this.leftFrame.setAttribute("style", "float: left;");
+            this.midFrame.setAttribute("style", "height: 64px;width: 412px;position: absolute;left: 218px;");
+            this.midrightFrame.setAttribute("style", "height: 64px;position: absolute;left: 640px;");
+            this.rightFrame.setAttribute("style", "height: 64px;width: 62px;position: absolute;left: 770px;");
+
+            this.prevButton.setAttribute("src", "./buttons/prev.png");
+            this.playButton.setAttribute("src", "./buttons/play.png");
+            this.nextButton.setAttribute("src", "./buttons/next.png");
+
+            this.timeLine.setAttribute("style", "cursor: pointer;margin-left: 6px;margin-top: 31px;height: 2px;width: 400px;background-color: black;float: left;");
+            this.timeButton.setAttribute("src", "./buttons/time.png");
+            this.timeButton.setAttribute("style", "cursor: pointer;margin-top: 26px;position: absolute;left: 6px;float: left;");
+
+            this.singleButton.setAttribute("src", "./buttons/single.png");
+            this.listButton.setAttribute("src", "./buttons/list.png");
+            this.randomButton.setAttribute("src", "./buttons/random.png");
+            this.volSwitch.setAttribute("src", "./buttons/vol_on.png");
+
+            this.volLine.setAttribute("style", "cursor: pointer;margin-left: 6px;margin-top: 31px;height: 2px;width: 50px;background-color: black;float: left;");
+            this.volButton.setAttribute("src", "./buttons/vol.png");
+            this.volButton.setAttribute("style", "cursor: pointer;margin-top: 26px;position: absolute;left: 6px;float: left;");
+
+            this.leftFrame.appendChild(this.prevButton);
+            this.leftFrame.appendChild(this.playButton);
+            this.leftFrame.appendChild(this.nextButton);
+
+            this.midFrame.appendChild(this.timeLine);
+            this.midFrame.appendChild(this.timeButton);
+
+            this.midrightFrame.appendChild(this.singleButton);
+            this.midrightFrame.appendChild(this.listButton);
+            this.midrightFrame.appendChild(this.randomButton);
+            this.midrightFrame.appendChild(this.volSwitch);
+
+            this.rightFrame.appendChild(this.volLine);
+            this.rightFrame.appendChild(this.volButton);
+
+            document.body.appendChild(this.playerFrame);
+        };
+
+        this.switchToPause = function() {
             this.playButton.setAttribute("src", "./buttons/pause.png");
         };
 
-        this.playerPause = function() {
-            this.audioPlayer.pause();
+        this.switchToPlay = function() {
             this.playButton.setAttribute("src", "./buttons/play.png");
         };
 
-        this.setIsPlay = function() {
-            this.isPlay = !(this.isPlay);
+        this.swtichOn = function() {
+            this.volSwitch.setAttribute("src", "./buttons/vol_on.png");
         };
 
-        this.setTime = function(time) {
-            this.audioPlayer.currentTime = time;
-            if (time < this.audioPlayer.duration)
-                this.audioPlayer.play();
+        this.switchOff = function() {
+            this.volSwitch.setAttribute("src", "./buttons/vol_off.png");
         };
 
-        this.setVol = function(vol) {
-            this.audioPlayer.volume = vol;
+        this.updateTime = function(timeP) {
+            this.timeButton.style.left = (timeP * 400) + "px";
         };
 
-        this.volOff = function() {
-            this.currentVolume = this.audioPlayer.volume;
-            this.audioPlayer.volume = 0;
-            this.volumeButton.setAttribute("src", "./buttons/volume_off.png");
+        this.updateVol = function(volX) {
+            this.volButton.style.left = volX;
+        };
+    }
+    ;
+
+    function playController() {
+        this.init = function() {
+            this.musicList = new playList();
+            this.musicPanel = new playPanel();
+            this.currentVol = defaultVol;
+            this.isPlay = defaultisPlay;
+            this.isMuted = defaultisMuted;
+            this.playMode = defaultplayMode;
+            this.isLoop = defaultisLoop;
+
+            this.musicList.init();
+            this.musicPanel.init();
         };
 
-        this.volOn = function() {
-            this.audioPlayer.volume = this.currentVolume;
-            this.volumeButton.setAttribute("src", "./buttons/volume_on.png");
+        this.play = function() {
+            if (this.musicPanel.audioPlayer.src === "")
+                this.musicPanel.audioPlayer.src = this.musicList.getOne(defaultindex).src;
+            this.musicPanel.audioPlayer.play();
+            this.setisPlay();
+            this.musicPanel.switchToPause();
         };
 
-        this.setIsMuted = function() {
-            this.isMuted = !(this.isMuted);
+        this.pause = function() {
+            this.musicPanel.audioPlayer.pause();
+            this.musicPanel.switchToPlay();
+            this.setisPlay();
         };
 
-        this.playNext = function() {
-            this.playMusic(this.musicList.getNext().src);
+        this.playMusic = function(src) {
+            this.musicPanel.audioPlayer.src = src;
+            this.play();
         };
 
         this.playPrev = function() {
-            this.playMusic(this.musicList.getPrev().src);
+            switch (this.playMode) {
+                case 1:
+                    this.playMusic(this.musicList.getPrev().src);
+                    break;
+                case 2:
+                    this.playMusic(this.musicList.getRandom().src);
+                    break;
+                default:
+                    break;
+            }
+            ;
+        };
+
+        this.playNext = function() {
+            switch (this.playMode) {
+                case 1:
+                    this.playMusic(this.musicList.getNext().src);
+                    break;
+                case 2:
+                    this.playMusic(this.musicList.getRandom().src);
+                    break;
+                default:
+                    break;
+            }
+            ;
         };
 
         this.playRandom = function() {
             this.playMusic(this.musicList.getRandom().src);
         };
 
-        this.drawTimeLine = function(currentTime) {
-            var timeLineCtx = this.timeLine.getContext('2d');
-            timeLineCtx.clearRect(0, 0, this.timeLine.width, this.timeLine.height);
-
-            timeLineCtx.beginPath();
-            timeLineCtx.moveTo(10, this.timeLine.height / 2);
-            timeLineCtx.lineTo(this.timeLine.width - 10, this.timeLine.height / 2);
-            timeLineCtx.closePath();
-            timeLineCtx.stroke();
-
-            timeLineCtx.fillStyle = "#000000";
-            timeLineCtx.beginPath();
-            timeLineCtx.arc(currentTime + 10, this.timeLine.height / 2, 5, 0, Math.PI * 2, true);
-            timeLineCtx.closePath();
-            timeLineCtx.fill();
+        this.setisPlay = function() {
+            this.isPlay = (!this.isPlay);
         };
 
-        this.drawVolumeBar = function(currentVol) {
-            var volumeBarCtx = this.volumeBar.getContext('2d');
-            volumeBarCtx.clearRect(0, 0, this.volumeBar.width, this.volumeBar.height);
-
-            volumeBarCtx.beginPath();
-            volumeBarCtx.moveTo(5, this.volumeBar.height / 2);
-            volumeBarCtx.lineTo(this.volumeBar.width - 5, this.volumeBar.height / 2);
-            volumeBarCtx.closePath();
-            volumeBarCtx.stroke();
-
-            volumeBarCtx.fillStyle = "#000000";
-            volumeBarCtx.beginPath();
-            volumeBarCtx.arc(currentVol + 5, this.volumeBar.height / 2, 5, 0, Math.PI * 2, true);
-            volumeBarCtx.closePath();
-            volumeBarCtx.fill();
+        this.volOn = function() {
+            this.musicPanel.audioPlayer.volume = this.currentVol;
+            this.musicPanel.swtichOn();
+            this.setisMuted();
         };
 
-        this.initBar = function() {
-            this.drawTimeLine(0);
-            this.drawVolumeBar(this.currentVolume * 50);
+        this.volOff = function() {
+            this.currentVol = this.musicPanel.audioPlayer.volume;
+            this.musicPanel.audioPlayer.volume = 0;
+            this.musicPanel.switchOff();
+            this.setisMuted();
         };
 
-        this.init = function() {
-            this.playerFrame = document.createElement("div");
-            this.audioPlayer = document.createElement("audio");
-            this.prevButton = document.createElement("img");
-            this.nextButton = document.createElement("img");
-            this.playButton = document.createElement("img");
-            this.timeLine = document.createElement("canvas");
-            this.volumeButton = document.createElement("img");
-            this.volumeBar = document.createElement("canvas");
-            this.playerFrame.setAttribute("style", "text-align: center;position: fixed;left: 0px;bottom: 0px;border: 1px solid black;border-radius: 10px;");
+        this.setisMuted = function() {
+            this.isMuted = (!this.isMuted);
+        };
 
-            this.audioPlayer.autoplay = false;
-            this.audioPlayer.controls = false;
-            this.audioPlayer.volume = this.currentVolume;
+        this.setTime = function(timex) {
+            this.musicPanel.audioPlayer.currentTime = this.musicPanel.audioPlayer.duration * 400 / timex;
+        };
 
-            this.prevButton.setAttribute("src", "./buttons/prev.png");
-            this.prevButton.setAttribute("style", "cursor: pointer");
-            this.playButton.setAttribute("src", "./buttons/play.png");
-            this.playButton.setAttribute("style", "cursor: pointer");
-            this.nextButton.setAttribute("src", "./buttons/next.png");
-            this.nextButton.setAttribute("style", "cursor: pointer");
-            this.volumeButton.setAttribute("src", "./buttons/volume_on.png");
-            this.volumeButton.setAttribute("style", "margin-bottom: 16px;cursor: pointer;");
+        this.getTime = function() {
+            return this.musicPanel.audioPlayer.currentTime / this.musicPanel.audioPlayer.duration;
+        };
 
-            this.timeLine.setAttribute("width", 420);
-            this.timeLine.setAttribute("height", 20);
-            this.timeLine.setAttribute("style", "margin-bottom: 22px;cursor: pointer;");
-            this.volumeBar.setAttribute("width", 60);
-            this.volumeBar.setAttribute("height", 20);
-            this.volumeBar.setAttribute("style", "margin-bottom: 22px;cursor: pointer;");
-            this.playerFrame.appendChild(this.audioPlayer);
-            this.playerFrame.appendChild(this.prevButton);
-            this.playerFrame.appendChild(this.playButton);
-            this.playerFrame.appendChild(this.nextButton);
-            this.playerFrame.appendChild(this.timeLine);
-            this.playerFrame.appendChild(this.volumeButton);
-            this.playerFrame.appendChild(this.volumeBar);
-
-            document.body.appendChild(this.playerFrame);
-
-            this.initBar();
+        this.setVol = function(volx) {
+            this.currentVol = volx / 50;
+            this.musicPanel.audioPlayer.volume = this.currentVol;
         };
     }
     ;
@@ -236,7 +310,7 @@
         myMusicPlayer.audioPlayer.addEventListener("timeupdate", function() {
             myMusicPlayer.drawTimeLine(this.currentTime * 400 / this.duration);
         }, false);
-        
+
         myMusicPlayer.audioPlayer.addEventListener("ended", function() {
             myMusicPlayer.playNext();
         }, false);
