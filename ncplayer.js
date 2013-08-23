@@ -1,78 +1,98 @@
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * ncplayer简介：
+ *     ncplayer是一个纯js实现的网络音频播放器，使用时只需将js文件引入页面即可，它会自动将当前页面的音频文件加载到播放列表里以供播放。
+ *
+ * ncplayer项目地址：
+ *     https://github.com/zhangzhongyao/ncplayer/
+ *
+ * ncplayer开发人员邮箱：
+ *     zzyupc@gmail.com
  */
-
 (function(window, undefined) {
-    var defaultindex = 0;
-    var defaultVol = 0.5;
-    var defaultisMuted = false;
-    var defaultisPlay = false;
-    var defaultplayMode = 1;
-    var defaultisLoop = false;
+    var defaultindex = 0;// 默认播放的音频文件索引序号
+    var defaultVol = 0.5;// 默认音量值
+    var defaultisMuted = false;// 默认不静音
+    var defaultisPlay = false;// 默认不播放
+    var defaultplayMode = 1;// 默认为单曲播放
+    var defaultisLoop = false;// 默认不循环
 
-    function playList() {
-        this.srcList = new Array();
-        this.musicList = new Array();
-        this.currentMusic = new Object();
+    /**
+     * 播放列表类，包含播放列表数据和对播放列表的基本操作
+     */
+    function PlayList() {
+        this.srcList = new Array();// 音频文件url地址数组
+        this.playList = new Array();// 音频文件名称数组
+        this.currentMusic = new Object();// 当前（将要）播放的音频
 
+        // 初始化方法
         this.init = function() {
             var aList = document.getElementsByTagName("a");
             var checker = new RegExp("\.mp3$");
             for (var eIndex in aList) {
                 if (checker.exec(aList[eIndex].href)) {
                     this.srcList.push(aList[eIndex].href);
-                    this.musicList.push(aList[eIndex].href);
+                    this.playList.push(aList[eIndex].href);
                 }
             }
             ;
             this.currentMusic.index = defaultindex;
-            this.currentMusic.name = this.musicList[defaultindex];
+            this.currentMusic.name = this.playList[defaultindex];
             this.currentMusic.src = this.srcList[defaultindex];
         };
 
+        // 获取播放列表里的指定索引的音频
         this.getOne = function(index) {
             this.currentMusic.index = index;
-            this.currentMusic.name = this.musicList[index];
+            this.currentMusic.name = this.playList[index];
             this.currentMusic.src = this.srcList[index];
             return this.currentMusic;
         };
 
+        // 获取播放列表里的下一个音频
         this.getNext = function() {
-            this.currentMusic.index = (this.currentMusic.index + 1) % this.musicList.length;
-            this.currentMusic.name = this.musicList[this.currentMusic.index];
+            this.currentMusic.index = (this.currentMusic.index + 1) % this.playList.length;
+            this.currentMusic.name = this.playList[this.currentMusic.index];
             this.currentMusic.src = this.srcList[this.currentMusic.index];
             return this.currentMusic;
         };
 
+        // 获取播放列表里的上一个音频
         this.getPrev = function() {
-            this.currentMusic.index = (this.currentMusic.index + this.musicList.length) % this.musicList.length;
-            this.currentMusic.name = this.musicList[this.currentMusic.index];
+            this.currentMusic.index = (this.currentMusic.index + this.playList.length) % this.playList.length;
+            this.currentMusic.name = this.playList[this.currentMusic.index];
             this.currentMusic.src = this.srcList[this.currentMusic.index];
             return this.currentMusic;
         };
 
+        // 获取播放列表里随机一个音频文件，但非当前音频
         this.getRandom = function() {
-            var tmpIndex = parseInt(Math.random() * this.musicList.length);
+            var tmpIndex = parseInt(Math.random() * this.playList.length);
             while (tmpIndex === this.currentMusic.index)
-                tmpIndex = parseInt(Math.random() * this.musicList.length);
+                tmpIndex = parseInt(Math.random() * this.playList.length);
             this.currentMusic.index = tmpIndex;
-            this.currentMusic.name = this.musicList[tmpIndex];
+            this.currentMusic.name = this.playList[tmpIndex];
             this.currentMusic.src = this.srcList[tmpIndex];
             return this.currentMusic;
         };
 
+        // 当前音频是否播放列表的第一个音频
         this.isFirst = function() {
             return this.currentMusic.index === 0;
         };
 
+        // 当前音频是否播放列表的末一个音频
         this.isLast = function() {
             return (this.currentMusic.index + 1) === this.srcList.length;
         };
     }
     ;
 
-    function playPanel() {
+    /**
+     * -----------------尚未完成-----------------------
+     * 播放界面类，包含界面元素和针对这些元素的基本操作
+     * -----------------尚未完成-----------------------
+     */
+    function PlayPanel() {
         this.init = function() {
             this.initElement();
             this.initStyle();
@@ -175,46 +195,65 @@
     }
     ;
 
-    function playController() {
-        this.init = function() {
-            this.musicList = new playList();
-            this.musicPanel = new playPanel();
-            this.currentVol = defaultVol;
-            this.isPlay = defaultisPlay;
-            this.isMuted = defaultisMuted;
-            this.playMode = defaultplayMode;
-            this.isLoop = defaultisLoop;
+    /**
+     * -------------------------尚未完成-----------------------------------
+     * 播放器类，将播放列表和播放器界面各元素联系起来，定义播放器的各项功能
+     * -------------------------尚未完成-----------------------------------
+     */
+    function NCPlayer() {
+        // 初始化方法
+        this.init = function(c) {
+            this.playList = new PlayList();// 播放列表
+            this.playPanel = new PlayPanel();// 播放器界面
+            this.currentVol = defaultVol;// 当前音量
+            this.isPlay = defaultisPlay;// 是否播放中
+            this.isMuted = defaultisMuted;// 是否静音中
+            this.playMode = defaultplayMode;// 播放模式
+            this.isLoop = defaultisLoop;// 是否循环
 
-            this.musicList.init();
-            this.musicPanel.init();
+            this.playList.init();
+            this.playPanel.init();
+			this.initEventListener(c);
         };
 
+        // 基本播放方法
         this.play = function() {
-            if (this.musicPanel.audioPlayer.src === "")
-                this.musicPanel.audioPlayer.src = this.musicList.getOne(defaultindex).src;
-            this.musicPanel.audioPlayer.play();
+            if (this.playPanel.audioPlayer.src === "")
+                this.playPanel.audioPlayer.src = this.playList.getOne(defaultindex).src;
+            this.playPanel.audioPlayer.play();
             this.setisPlay();
-            this.musicPanel.switchToPause();
+            this.playPanel.switchToPause();
         };
 
+        // 基本暂停方法
         this.pause = function() {
-            this.musicPanel.audioPlayer.pause();
-            this.musicPanel.switchToPlay();
+            this.playPanel.audioPlayer.pause();
             this.setisPlay();
+            this.playPanel.switchToPlay();
         };
 
+        // 播放音乐
         this.playMusic = function(src) {
-            this.musicPanel.audioPlayer.src = src;
+            this.playPanel.audioPlayer.src = src;
             this.play();
         };
 
+		// 播放状态变化（播放/暂停）
+        this.playSwitch = function() {
+			if(this.isPlay)
+				this.pause();
+			else
+				this.play();
+		};
+
+        // 播放前一首
         this.playPrev = function() {
             switch (this.playMode) {
                 case 1:
-                    this.playMusic(this.musicList.getPrev().src);
+                    this.playMusic(this.playList.getPrev().src);
                     break;
                 case 2:
-                    this.playMusic(this.musicList.getRandom().src);
+                    this.playMusic(this.playList.getRandom().src);
                     break;
                 default:
                     break;
@@ -222,13 +261,14 @@
             ;
         };
 
+        // 播放下一首
         this.playNext = function() {
             switch (this.playMode) {
                 case 1:
-                    this.playMusic(this.musicList.getNext().src);
+                    this.playMusic(this.playList.getNext().src);
                     break;
                 case 2:
-                    this.playMusic(this.musicList.getRandom().src);
+                    this.playMusic(this.playList.getRandom().src);
                     break;
                 default:
                     break;
@@ -236,99 +276,86 @@
             ;
         };
 
+        // 随机播放------该方法可能会被删除
         this.playRandom = function() {
-            this.playMusic(this.musicList.getRandom().src);
+            this.playMusic(this.playList.getRandom().src);
         };
 
+        // isPlay值变化
         this.setisPlay = function() {
             this.isPlay = (!this.isPlay);
         };
 
+		// 音量开关
+        this.volSwitch = function() {
+			if(this.isMuted)
+				this.volOn();
+			else
+				this.volOff();
+		};
+
+        // 音量开
         this.volOn = function() {
-            this.musicPanel.audioPlayer.volume = this.currentVol;
-            this.musicPanel.swtichOn();
+            this.playPanel.audioPlayer.volume = this.currentVol;
             this.setisMuted();
+            this.playPanel.swtichOn();
         };
 
+        // 音量关
         this.volOff = function() {
-            this.currentVol = this.musicPanel.audioPlayer.volume;
-            this.musicPanel.audioPlayer.volume = 0;
-            this.musicPanel.switchOff();
+            this.currentVol = this.playPanel.audioPlayer.volume;
+            this.playPanel.audioPlayer.volume = 0;
             this.setisMuted();
+            this.playPanel.switchOff();
         };
 
+        // isMuted值变化
         this.setisMuted = function() {
             this.isMuted = (!this.isMuted);
         };
 
-        this.setTime = function(timex) {
-            this.musicPanel.audioPlayer.currentTime = this.musicPanel.audioPlayer.duration * 400 / timex;
+		// 更新时间轴
+        this.updateTimeLine = function() {
+			this.playPanel.timeButton.style.left = (400 * this.getTime()) + "px";
+		};
+
+		// 更新音量轴
+        this.updateVolLine = function(fixedX) {
+			this.playPanel.volButton.style.left = fixedX + "px";
+		};
+
+        // 设置当前播放的时间点
+        this.setTime = function(timePercent) {
+            this.playPanel.audioPlayer.currentTime = this.playPanel.audioPlayer.duration * timePercent;
         };
 
+        // 获取当前播放的时间点
         this.getTime = function() {
-            return this.musicPanel.audioPlayer.currentTime / this.musicPanel.audioPlayer.duration;
+            return this.playPanel.audioPlayer.currentTime / this.playPanel.audioPlayer.duration;
         };
 
-        this.setVol = function(volx) {
-            this.currentVol = volx / 50;
-            this.musicPanel.audioPlayer.volume = this.currentVol;
+        // 设置音量
+        this.setVol = function(volPercent) {
+            this.playPanel.audioPlayer.volume = this.currentVol = volPercent;
         };
+
+		// 初始化监听器
+        this.initEventListener = function(c) {
+			this.playPanel.prevButton.addEventListener("click", c.playPrev, false);
+			this.playPanel.playButton.addEventListener("click", c.playSwitch, false);
+			this.playPanel.nextButton.addEventListener("click", c.playNext, false);
+			this.playPanel.volSwitcher.addEventListener("click", c.volSwitch, false);
+			this.playPanel.audioPlayer.addEventListener("timeupdate", c.updateTimeLine, false);
+			this.playPanel.audioPlayer.addEventListener("ended", c.playNext, false);
+		};
     }
     ;
 
-    var initEventListener = function() {
-        myMusicPlayer.prevButton.addEventListener("click", function() {
-            if (myMusicPlayer.loopMode === 2)
-                myMusicPlayer.playPrev();
-            else
-                myMusicPlayer.playRandom();
-        }, false);
-
-        myMusicPlayer.playButton.addEventListener("click", function() {
-            if (myMusicPlayer.isPlay === false)
-                myMusicPlayer.playerPlay();
-            else
-                myMusicPlayer.playerPause();
-            myMusicPlayer.setIsPlay();
-        }, false);
-
-        myMusicPlayer.nextButton.addEventListener("click", function() {
-            if (myMusicPlayer.loopMode === 2)
-                myMusicPlayer.playNext();
-            else
-                myMusicPlayer.playRandom();
-        }, false);
-
-        myMusicPlayer.volumeButton.addEventListener("click", function() {
-            if (myMusicPlayer.isMuted)
-                myMusicPlayer.volOn();
-            else
-                myMusicPlayer.volOff();
-            myMusicPlayer.setIsMuted();
-        }, false);
-
-        myMusicPlayer.audioPlayer.addEventListener("timeupdate", function() {
-            myMusicPlayer.drawTimeLine(this.currentTime * 400 / this.duration);
-        }, false);
-
-        myMusicPlayer.audioPlayer.addEventListener("ended", function() {
-            myMusicPlayer.playNext();
-        }, false);
-
-        /*myMusicPlayer.timeLine.addEventListener("mousemove", function(event) {
-         console.warn(event.layerX);
-         var tarX = event.layerX > 410 ? 400 : (event.layerX - 10);
-         console.warn(tarX);
-         myMusicPlayer.setTime(tarX * myMusicPlayer.audioPlayer.duration / 400);
-         myMusicPlayer.drawTimeLine(tarX);
-         }, false);*/
-    };
-
+    /**
+     * 当页面完成加载后，启动播放器
+     */
     window.onload = function() {
-        myMusicList = new playList();
-        myMusicList.init();
-        myMusicPlayer = new musicPlayer(myMusicList);
-        myMusicPlayer.init();
-        initEventListener();
+		ncplayer = new NCPlayer();
+		ncplayer.init(ncplayer);
     };
 })(window);
