@@ -213,7 +213,7 @@
 
             this.playList.init();
             this.playPanel.init();
-			this.initEventListener(c);
+            this.initEventListener(c);
         };
 
         // 基本播放方法
@@ -240,10 +240,10 @@
 
         // 播放开关
         this.playSwitch = function() {
-			if(this.isPlay)
-				this.pause();
-			else
-				this.play();
+            if(this.isPlay)
+                this.pause();
+            else
+                this.play();
 		};
 
         // 播放前一首
@@ -288,10 +288,10 @@
 
         // 音量开关
         this.volSwitch = function() {
-			if(this.isMuted)
-				this.volOn();
-			else
-				this.volOff();
+            if(this.isMuted)
+                this.volOn();
+            else
+                this.volOff();
 		};
 
         // 音量开
@@ -316,12 +316,12 @@
 
         // 更新时间轴
         this.updateTimeLine = function() {
-			this.playPanel.timeButton.style.left = (400 * this.getTime()) + "px";
+            this.playPanel.timeButton.style.left = (400 * this.getTime()) + "px";
 		};
 
         // 更新音量轴
         this.updateVolLine = function(fixedX) {
-			this.playPanel.volButton.style.left = fixedX + "px";
+            this.playPanel.volButton.style.left = fixedX + "px";
 		};
 
         // 设置当前播放的时间点
@@ -341,12 +341,12 @@
 
         // 初始化监听器
         this.initEventListener = function(c) {
-			this.playPanel.prevButton.addEventListener("click", c.playPrev, false);
-			this.playPanel.playButton.addEventListener("click", c.playSwitch, false);
-			this.playPanel.nextButton.addEventListener("click", c.playNext, false);
-			this.playPanel.volSwitcher.addEventListener("click", c.volSwitch, false);
-			this.playPanel.audioPlayer.addEventListener("timeupdate", c.updateTimeLine, false);
-			this.playPanel.audioPlayer.addEventListener("ended", c.playNext, false);
+            this.playPanel.prevButton.addEventListener("click", c.playPrev, false);
+            this.playPanel.playButton.addEventListener("click", c.playSwitch, false);
+            this.playPanel.nextButton.addEventListener("click", c.playNext, false);
+            this.playPanel.volSwitcher.addEventListener("click", c.volSwitch, false);
+            this.playPanel.audioPlayer.addEventListener("timeupdate", c.updateTimeLine, false);
+            this.playPanel.audioPlayer.addEventListener("ended", c.playNext, false);
 		};
     }
     ;
@@ -355,7 +355,7 @@
      * 当页面完成加载后，启动播放器
      */
     window.onload = function() {
-		ncplayer = new NCPlayer();
-		ncplayer.init(ncplayer);
+        ncplayer = new NCPlayer();
+        ncplayer.init(ncplayer);
     };
 })(window);
