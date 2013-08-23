@@ -238,7 +238,7 @@
             this.play();
         };
 
-		// 播放状态变化（播放/暂停）
+        // 播放开关
         this.playSwitch = function() {
 			if(this.isPlay)
 				this.pause();
@@ -286,7 +286,7 @@
             this.isPlay = (!this.isPlay);
         };
 
-		// 音量开关
+        // 音量开关
         this.volSwitch = function() {
 			if(this.isMuted)
 				this.volOn();
@@ -314,12 +314,12 @@
             this.isMuted = (!this.isMuted);
         };
 
-		// 更新时间轴
+        // 更新时间轴
         this.updateTimeLine = function() {
 			this.playPanel.timeButton.style.left = (400 * this.getTime()) + "px";
 		};
 
-		// 更新音量轴
+        // 更新音量轴
         this.updateVolLine = function(fixedX) {
 			this.playPanel.volButton.style.left = fixedX + "px";
 		};
@@ -339,7 +339,7 @@
             this.playPanel.audioPlayer.volume = this.currentVol = volPercent;
         };
 
-		// 初始化监听器
+        // 初始化监听器
         this.initEventListener = function(c) {
 			this.playPanel.prevButton.addEventListener("click", c.playPrev, false);
 			this.playPanel.playButton.addEventListener("click", c.playSwitch, false);
