@@ -8,12 +8,13 @@
  * ncplayer开发人员邮箱：
  *     zzyupc@gmail.com
  */
+
 (function(window, undefined) {
     var defaultindex = 0;// 默认播放的音频文件索引序号
     var defaultVol = 0.5;// 默认音量值
     var defaultisMuted = false;// 默认不静音
     var defaultisPlay = false;// 默认不播放
-    var defaultplayMode = 1;// 默认为单曲播放
+    var defaultplayMode = 1;// 默认为单曲播放，1：单曲；2：列表；3：随机
     var defaultisLoop = false;// 默认不循环
 
     /**
@@ -27,7 +28,7 @@
         // 初始化方法
         this.init = function() {
             var aList = document.getElementsByTagName("a");
-            var checker = new RegExp("\.mp3$");
+            var checker = new RegExp("\.mp3$");// 此处功能缺失，应对浏览器进行判断然后确定匹配何种格式的文件
             for (var eIndex in aList) {
                 if (checker.exec(aList[eIndex].href)) {
                     this.srcList.push(aList[eIndex].href);
@@ -40,7 +41,7 @@
             this.currentMusic.src = this.srcList[defaultindex];
         };
 
-        // 获取播放列表里的指定索引的音频
+        // 获取播放列表里的指定索引的音频文件
         this.getOne = function(index) {
             this.currentMusic.index = index;
             this.currentMusic.name = this.playList[index];
@@ -96,6 +97,7 @@
         this.init = function() {
             this.initElement();
             this.initStyle();
+            return this.audiPlayer;
         };
 
         this.initElement = function() {
@@ -216,23 +218,24 @@
             this.initEventListener(c);
         };
 
-        // 基本播放方法
+        // 播放
         this.play = function() {
             if (this.playPanel.audioPlayer.src === "")
                 this.playPanel.audioPlayer.src = this.playList.getOne(defaultindex).src;
             this.playPanel.audioPlayer.play();
-            this.setisPlay();
+			if(!this.isPlay)
+                this.setisPlay();
             this.playPanel.switchToPause();
         };
 
-        // 基本暂停方法
+        // 暂停
         this.pause = function() {
             this.playPanel.audioPlayer.pause();
             this.setisPlay();
             this.playPanel.switchToPlay();
         };
 
-        // 播放音乐
+        // 播放指定音乐
         this.playMusic = function(src) {
             this.playPanel.audioPlayer.src = src;
             this.play();
@@ -244,44 +247,26 @@
                 this.pause();
             else
                 this.play();
+			this.setisPlay();
 		};
 
         // 播放前一首
         this.playPrev = function() {
-            switch (this.playMode) {
-                case 1:
-                    this.playMusic(this.playList.getPrev().src);
-                    break;
-                case 2:
-                    this.playMusic(this.playList.getRandom().src);
-                    break;
-                default:
-                    break;
-            }
-            ;
+            if(this.playMode == 3)// 仅随机播放的模式下获取随机文件，其它模式均获取前一个文件
+                this.playMusic(this.playList.getRandom().src);
+            else if(this.isLoop)
+                this.playMusic(this.playList.getPrev().src);
         };
 
         // 播放下一首
         this.playNext = function() {
-            switch (this.playMode) {
-                case 1:
-                    this.playMusic(this.playList.getNext().src);
-                    break;
-                case 2:
-                    this.playMusic(this.playList.getRandom().src);
-                    break;
-                default:
-                    break;
-            }
-            ;
+            if(this.playMode == 3)// 仅岁末播放的模式下获取随机文件，其它模式均获取下一个文件
+                this.playMusic(this.playList.getRandom().src);
+            else if(this.isLoop)
+                this.playMusic(this.playList.gerNext().src);
         };
-
-        // 随机播放------该方法可能会被删除
-        this.playRandom = function() {
-            this.playMusic(this.playList.getRandom().src);
-        };
-
-        // isPlay值变化
+        
+        // 修改当前播放状态
         this.setisPlay = function() {
             this.isPlay = (!this.isPlay);
         };
@@ -309,24 +294,25 @@
             this.playPanel.switchOff();
         };
 
-        // isMuted值变化
+        // 静音状态设置
         this.setisMuted = function() {
             this.isMuted = (!this.isMuted);
         };
 
         // 更新时间轴
         this.updateTimeLine = function() {
-            this.playPanel.timeButton.style.left = (400 * this.getTime()) + "px";
+            this.playPanel.updateTimeLine(this.getTime());
 		};
 
         // 更新音量轴
-        this.updateVolLine = function(fixedX) {
-            this.playPanel.volButton.style.left = fixedX + "px";
+        this.updateVolLine = function() {
+            this.playPanel.updateVolLine(this.getVol());
 		};
 
-        // 设置当前播放的时间点
+        // 设置当前播放的时间点，用于拖动调整进度条时改变当前播放位置和页面显示
         this.setTime = function(timePercent) {
             this.playPanel.audioPlayer.currentTime = this.playPanel.audioPlayer.duration * timePercent;
+            this.updateTimeLine();
         };
 
         // 获取当前播放的时间点
@@ -337,6 +323,12 @@
         // 设置音量
         this.setVol = function(volPercent) {
             this.playPanel.audioPlayer.volume = this.currentVol = volPercent;
+            this.updateVolLine();
+        };
+
+        // 获取当前音量
+        this.getVol = function() {
+            return this.playerPanel.audioPlayer.volume;
         };
 
         // 初始化监听器
